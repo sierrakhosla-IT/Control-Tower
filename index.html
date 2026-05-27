@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repsol Control Tower</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:      #F4F2EF;
+  --surface: #FFFFFF;
+  --surface2:#F8F6F4;
+  --border:  #E2DBD4;
+  --border2: #CEC6BE;
+  --text:    #1E1A16;
+  --text2:   #6A6460;
+  --text3:   #9E9894;
+  --coral:   #E85D48;
+  --coral-t: rgba(232,93,72,0.09);
+  --lime:    #7FB541;
+  --lime-t:  rgba(127,181,65,0.10);
+  --red:     #CC3A2A;
+  --font:    'DM Sans', system-ui, sans-serif;
+  --mono:    'DM Mono', monospace;
+  --max:     800px;
+  --r:       10px;
+  --r2:      6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font); background: var(--bg); color: var(--text);
+  font-size: 14px; line-height: 1.5; min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+.header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 22px; height: 50px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.hbrand { display: flex; align-items: center; gap: 9px; }
+.hmark {
+  width: 23px; height: 23px; background: var(--coral); border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.hname { font-size: 14px; font-weight: 600; letter-spacing: -0.3px; color: var(--coral); }
+.hsep  { width: 1px; height: 14px; background: var(--border2); }
+.hdate { font-size: 12px; color: var(--text2); }
+.hactions { display: flex; align-items: center; gap: 8px; }
+.hsaved { font-size: 11px; color: var(--text3); }
+
+/* ── BUTTONS ────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  padding: 5px 13px; border-radius: var(--r2);
+  cursor: pointer; border: 1px solid transparent;
+  transition: all .13s; line-height: 1; white-space: nowrap;
+}
+.btn-ghost { background: transparent; color: var(--text2); border-color: var(--border); }
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+.btn-coral { background: var(--coral); color: #fff; border-color: var(--coral); }
+.btn-coral:hover { background: #d44a36; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+.btn-icon {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; padding: 3px 5px; border-radius: 4px; font-size: 13px; line-height: 1;
+  transition: color .12s, background .12s;
+}
+.btn-icon:hover { color: var(--text); background: var(--surface2); }
+.btn-link {
+  background: none; border: none; font-family: var(--font);
+  font-size: 11px; color: var(--text3); cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 2px; transition: color .12s;
+}
+.btn-link:hover { color: var(--text2); }
+
+/* ── LAYOUT ─────────────────────────────────────────────────────── */
+.main {
+  max-width: var(--max); margin: 0 auto;
+  padding: 20px 18px 60px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+.srow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 15px 0;
+}
+.slabel {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--coral); opacity: 0.65;
+}
+.sbody { padding: 8px 15px 14px; }
+
+/* ── MOVING NOW ──────────────────────────────────────────────────── */
+#moving-now { border-left: 3px solid var(--coral); }
+
+.focus-empty {
+  padding: 32px 18px; text-align: center;
+}
+.focus-empty-main { font-size: 14px; color: var(--text3); font-style: italic; }
+.focus-empty-hint { font-size: 12px; color: var(--text3); opacity: 0.55; margin-top: 3px; }
+
+.focus-active { padding: 20px 18px 16px; display: flex; gap: 13px; align-items: flex-start; }
+.focus-dot {
+  width: 7px; height: 7px; background: var(--coral); border-radius: 50%;
+  flex-shrink: 0; margin-top: 9px;
+  animation: fpulse 2.5s ease-in-out infinite;
+}
+@keyframes fpulse { 0%,100%{opacity:1;} 50%{opacity:.35;} }
+.focus-content { flex: 1; min-width: 0; }
+.focus-meta { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.focus-block-meta {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text3);
+  margin-bottom: 6px; font-variant-numeric: tabular-nums;
+}
+.focus-block-sep { opacity: 0.4; }
+.focus-elapsed-ext { color: var(--amber, #D4882A); }
+.focus-text { font-size: 20px; font-weight: 500; color: var(--text); letter-spacing: -0.4px; line-height: 1.28; }
+.focus-actions { display: flex; gap: 8px; margin-top: 11px; }
+
+.btn-done {
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  padding: 5px 14px; border-radius: 20px;
+  background: var(--lime-t); color: var(--lime);
+  border: 1px solid rgba(127,181,65,.22); cursor: pointer; transition: all .13s;
+}
+.btn-done:hover { background: var(--lime); color: #fff; border-color: var(--lime); }
+
+.btn-return {
+  font-family: var(--font); font-size: 12px; color: var(--text3);
+  background: none; border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px; cursor: pointer; transition: all .13s;
+}
+.btn-return:hover { border-color: var(--border2); color: var(--text2); }
+
+/* ── QUEUE ───────────────────────────────────────────────────────── */
+.qcount { font-size: 11px; color: var(--coral); opacity: 0.6; font-weight: 600; }
+.qcount.empty { color: var(--text3); opacity: 1; }
+
+.qlist { padding: 3px 0; }
+
+.qitem {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 15px; transition: background .11s; cursor: default;
+}
+.qitem:hover { background: var(--surface2); }
+.qitem.done  { opacity: 0.35; }
+.qitem.dragging { opacity: 0.22; }
+.qitem.droptarget { background: var(--coral-t); }
+
+.dhandle {
+  color: var(--border2); cursor: grab; font-size: 11px;
+  flex-shrink: 0; user-select: none; transition: color .11s;
+}
+.qitem:hover .dhandle { color: var(--text3); }
+.dhandle:active { cursor: grabbing; }
+
+.qcb {
+  -webkit-appearance: none; appearance: none;
+  width: 15px; height: 15px; flex-shrink: 0;
+  border: 1.5px solid var(--border2); border-radius: 3px;
+  cursor: pointer; position: relative; background: var(--surface); transition: all .13s;
+}
+.qcb:checked { background: var(--lime); border-color: var(--lime); }
+.qcb:checked::after {
+  content: ''; position: absolute;
+  left: 3px; top: 0; width: 5px; height: 8px;
+  border: 1.5px solid #fff; border-top: none; border-left: none;
+  transform: rotate(45deg);
+}
+.qtext {
+  flex: 1; font-size: 13.5px; color: var(--text);
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.qitem.done .qtext { text-decoration: line-through; color: var(--text3); }
+.qtime { font-size: 10px; color: var(--text3); opacity: 0.5; flex-shrink: 0; font-family: var(--mono); white-space: nowrap; }
+
+.qbtns { display: flex; gap: 1px; flex-shrink: 0; }
+.qbtn-focus {
+  background: none; border: none; color: var(--coral);
+  cursor: pointer; padding: 3px 6px; border-radius: 4px;
+  font-size: 13px; line-height: 1; opacity: 0.3; transition: opacity .12s, background .12s;
+}
+.qbtn-focus:hover { opacity: 1; background: var(--coral-t); }
+.qbtn-del {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; padding: 3px 5px; border-radius: 4px;
+  font-size: 13px; line-height: 1; opacity: 0; transition: opacity .12s, color .12s;
+}
+.qitem:hover .qbtn-del { opacity: 1; }
+.qbtn-del:hover { color: var(--red); }
+
+.qadd { padding: 5px 15px 10px; border-top: 1px solid var(--border); }
+.qadd-inp {
+  width: 100%; font-family: var(--font); font-size: 13px; color: var(--text);
+  background: transparent; border: none; outline: none; padding: 4px 0;
+}
+.qadd-inp::placeholder { color: var(--text3); }
+
+/* ── OPERATIONAL NOTES ──────────────────────────────────────────── */
+.onote-list { padding: 3px 0; }
+.onote-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 15px; transition: opacity .15s;
+}
+.onote-item.done { opacity: 0.35; }
+.onote-cb {
+  -webkit-appearance: none; appearance: none;
+  width: 13px; height: 13px; flex-shrink: 0;
+  border: 1.5px solid var(--border2); border-radius: 3px;
+  cursor: pointer; position: relative; background: var(--surface); transition: all .13s;
+}
+.onote-cb:checked { background: var(--lime); border-color: var(--lime); }
+.onote-cb:checked::after {
+  content: ''; position: absolute;
+  left: 2px; top: -1px; width: 5px; height: 8px;
+  border: 1.5px solid #fff; border-top: none; border-left: none;
+  transform: rotate(45deg);
+}
+.onote-text {
+  flex: 1; font-size: 13px; color: var(--text2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.onote-item.done .onote-text { text-decoration: line-through; color: var(--text3); }
+.onote-del {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; padding: 2px 4px; font-size: 12px; line-height: 1;
+  opacity: 0; transition: opacity .12s, color .12s; border-radius: 3px;
+}
+.onote-item:hover .onote-del { opacity: 1; }
+.onote-del:hover { color: var(--red); }
+.onote-add { padding: 5px 15px 10px; border-top: 1px solid var(--border); }
+.onote-inp {
+  width: 100%; font-family: var(--font); font-size: 13px; color: var(--text);
+  background: transparent; border: none; outline: none; padding: 3px 0;
+}
+.onote-inp::placeholder { color: var(--text3); font-style: italic; }
+
+/* ── COLLAPSIBLE ─────────────────────────────────────────────────── */
+.coll { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.ctrig {
+  width: 100%; background: none; border: none; cursor: pointer;
+  padding: 9px 15px; display: flex; align-items: center; gap: 9px;
+  font-family: var(--font); text-align: left; transition: background .11s;
+}
+.ctrig:hover { background: var(--surface2); }
+.ctrig:hover .ctitle { color: var(--coral); }
+.carrow { font-size: 9px; color: var(--text3); transition: transform .18s; flex-shrink: 0; }
+.coll.open .carrow { transform: rotate(90deg); }
+.ctitle { font-size: 13px; font-weight: 500; color: var(--text); }
+.cbadge {
+  font-size: 10px; font-weight: 600; margin-left: auto;
+  background: var(--surface2); color: var(--text3);
+  border: 1px solid var(--border); padding: 1px 7px; border-radius: 10px;
+}
+.cbadge.hot { background: var(--coral-t); color: var(--coral); border-color: rgba(232,93,72,.18); }
+.cbody {
+  max-height: 0; overflow: hidden;
+  transition: max-height .26s cubic-bezier(.4,0,.2,1);
+  border-top: 0 solid var(--border);
+}
+.coll.open .cbody { max-height: 480px; border-top-width: 1px; }
+
+/* ── INLINE TABLE (waiting, inventory) ───────────────────────────── */
+.itable { width: 100%; border-collapse: collapse; }
+.itable th {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text3); padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--border);
+}
+.itable td { padding: 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.itable tr:last-child td { border-bottom: none; }
+.itable tr:hover td { background: var(--surface2); }
+.itd-inp {
+  width: 100%; font-family: var(--font); font-size: 13px; color: var(--text);
+  background: transparent; border: none; outline: none; padding: 5px 10px;
+}
+.itd-inp::placeholder { color: var(--text3); }
+.itfoot { padding: 5px 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.itable tr.row-done { opacity: 0.35; transition: opacity .2s; }
+.itable tr.row-done .itd-inp { text-decoration: line-through; color: var(--text3); }
+td.cb-cell { width: 32px; text-align: center; vertical-align: middle; padding: 0 6px; }
+
+/* ── BLOCKED ─────────────────────────────────────────────────────── */
+.bcard {
+  background: var(--surface); border: 1px solid rgba(204,58,42,0.22);
+  border-left: 3px solid var(--red); border-radius: var(--r); display: none;
+}
+.blabel { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--red); opacity: 0.8; }
+.bitem {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 15px; border-bottom: 1px solid var(--border);
+}
+.bitem:last-of-type { border-bottom: none; }
+.bdot { width: 5px; height: 5px; background: var(--red); border-radius: 50%; flex-shrink: 0; }
+.btext { flex: 1; font-size: 13px; color: var(--text); }
+.badd { padding: 5px 15px 9px; border-top: 1px solid var(--border); display: none; }
+.badd-inp {
+  width: 100%; font-family: var(--font); font-size: 13px; color: var(--text);
+  background: transparent; border: none; outline: none; padding: 3px 0;
+}
+.badd-inp::placeholder { color: var(--text3); }
+
+/* ── DONE TODAY ──────────────────────────────────────────────────── */
+.ditem {
+  display: flex; align-items: center; gap: 9px;
+  padding: 5px 15px; border-bottom: 1px solid var(--border);
+}
+.ditem:last-child { border-bottom: none; }
+.dcheck { color: var(--lime); font-size: 11px; flex-shrink: 0; }
+.dtext  { font-size: 13px; color: var(--text2); flex: 1; }
+.dtime  { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+/* ── MODAL ───────────────────────────────────────────────────────── */
+.mback {
+  display: none; position: fixed; inset: 0;
+  background: rgba(30,26,22,0.3); z-index: 300;
+  align-items: center; justify-content: center; backdrop-filter: blur(2px);
+}
+.mback.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 13px;
+  padding: 24px; width: min(440px, calc(100vw - 28px));
+  box-shadow: 0 8px 36px rgba(0,0,0,0.14);
+}
+.mtitle { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; letter-spacing: -0.3px; }
+.msub   { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
+.mopt {
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 8px; cursor: pointer;
+  transition: border-color .13s, background .13s;
+}
+.mopt:hover, .mopt.sel { border-color: var(--coral); background: var(--coral-t); }
+.mopt-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; display: flex; align-items: center; gap: 7px; }
+.mpill { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; background: var(--coral); color: #fff; padding: 2px 6px; border-radius: 7px; }
+.mopt-body { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.mfoot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+/* ── MISC ────────────────────────────────────────────────────────── */
+.empty { padding: 9px 15px; text-align: center; color: var(--text3); font-size: 13px; font-style: italic; }
+
+@media (max-width: 640px) {
+  .main { padding: 14px 12px 50px; }
+  .header { padding: 0 14px; }
+  .hsaved, .hdate { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="hbrand">
+    <div class="hmark">R</div>
+    <span class="hname">Control Tower</span>
+    <div class="hsep"></div>
+    <span class="hdate" id="hdate"></span>
+  </div>
+  <div class="hactions">
+    <span class="hsaved" id="hsaved"></span>
+    <button class="btn btn-ghost btn-sm" onclick="manualSave()">Save</button>
+    <button class="btn btn-coral btn-sm" onclick="openNewDay()">Start New Day</button>
+  </div>
+</header>
+
+<!-- NEW DAY MODAL -->
+<div class="mback" id="ndModal" onclick="if(event.target===this)closeNewDay()">
+  <div class="modal">
+    <div class="mtitle">Start New Day</div>
+    <div class="msub">Today is archived. Choose how to begin.</div>
+    <div class="mopt sel" id="nd-carry" onclick="selNd('carry')">
+      <div class="mopt-title">Carry Forward <span class="mpill">Recommended</span></div>
+      <div class="mopt-body">Archive today. Carry unfinished queue items, waiting, and blockers.</div>
+    </div>
+    <div class="mopt" id="nd-fresh" onclick="selNd('fresh')">
+      <div class="mopt-title">Fresh Start</div>
+      <div class="mopt-body">Archive today. Begin completely empty.</div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-ghost" onclick="closeNewDay()">Cancel</button>
+      <button class="btn btn-coral" onclick="confirmNewDay()">Start New Day</button>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+  <!-- 1. MOVING NOW -->
+  <div class="card" id="moving-now">
+    <div class="srow"><span class="slabel">Moving Now</span></div>
+    <div id="focus-slot"></div>
+  </div>
+
+  <!-- 2. QUEUE -->
+  <div class="card">
+    <div class="srow">
+      <span class="slabel">Queue</span>
+      <span class="qcount" id="qcount"></span>
+    </div>
+    <div class="qlist" id="qlist"
+         ondragover="qDragOver(event)"
+         ondrop="qDrop(event)">
+    </div>
+    <div class="qadd">
+      <input class="qadd-inp" id="qAddInp" placeholder="Add to queue — press Enter..." onkeydown="qAddKey(event)">
+    </div>
+  </div>
+
+  <!-- 3. OPERATIONAL NOTES -->
+  <div class="coll" id="sec-opnotes">
+    <button class="ctrig" onclick="togColl('sec-opnotes')">
+      <span class="carrow">▶</span>
+      <span class="ctitle">Operational Notes</span>
+      <span class="cbadge" id="badge-opnotes" style="display:none;"></span>
+    </button>
+    <div class="cbody">
+      <div class="onote-list" id="onote-list"></div>
+      <div class="onote-add">
+        <input class="onote-inp" id="onote-inp"
+          placeholder="Add context note — press Enter…"
+          onkeydown="noteKey(event)">
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. INVENTORY MOVEMENT -->
+  <div class="coll" id="sec-inv">
+    <button class="ctrig" onclick="togColl('sec-inv')">
+      <span class="carrow">▶</span>
+      <span class="ctitle">Inventory Movement</span>
+      <span class="cbadge" id="badge-inv">0</span>
+    </button>
+    <div class="cbody">
+      <table class="itable">
+        <thead><tr>
+          <th style="width:28px;"></th>
+          <th>User</th>
+          <th>Device</th>
+          <th style="width:130px;">Serial / IMEI</th>
+          <th>Action</th>
+          <th style="width:32px;"></th>
+        </tr></thead>
+        <tbody id="inv-body"></tbody>
+      </table>
+      <div class="itfoot">
+        <button class="btn btn-ghost btn-sm" onclick="addInv()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. TICKETS -->
+  <div class="coll" id="sec-tkt">
+    <button class="ctrig" onclick="togColl('sec-tkt')">
+      <span class="carrow">▶</span>
+      <span class="ctitle">Tickets</span>
+      <span class="cbadge" id="badge-tkt">0</span>
+    </button>
+    <div class="cbody">
+      <table class="itable">
+        <thead><tr>
+          <th style="width:28px;"></th>
+          <th style="width:120px;">Ticket</th>
+          <th style="width:110px;">User</th>
+          <th>Focus</th>
+          <th style="width:150px;">Next</th>
+          <th style="width:32px;"></th>
+        </tr></thead>
+        <tbody id="tkt-body"></tbody>
+      </table>
+      <div class="itfoot">
+        <button class="btn btn-ghost btn-sm" onclick="addTkt()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. WAITING -->
+  <div class="coll" id="sec-wait">
+    <button class="ctrig" onclick="togColl('sec-wait')">
+      <span class="carrow">▶</span>
+      <span class="ctitle">Waiting</span>
+      <span class="cbadge" id="badge-wait">0</span>
+    </button>
+    <div class="cbody">
+      <table class="itable" id="wait-tbl" style="display:none;">
+        <thead><tr>
+          <th>Waiting On</th>
+          <th style="width:130px;">Next Push</th>
+          <th style="width:32px;"></th>
+        </tr></thead>
+        <tbody id="wait-body"></tbody>
+      </table>
+      <div id="wait-empty" class="empty">Nothing waiting.</div>
+      <div class="itfoot">
+        <button class="btn btn-ghost btn-sm" onclick="addWait()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. BLOCKED -->
+  <div class="bcard" id="bcard">
+    <div class="srow" style="padding-bottom:6px;">
+      <span class="blabel">Blocked</span>
+      <button class="btn btn-ghost btn-sm" id="badd-btn" onclick="showBlockedInput()">+ Add</button>
+    </div>
+    <div id="bitems"></div>
+    <div class="badd" id="badd-zone">
+      <input class="badd-inp" id="badd-inp" placeholder="What is blocked — press Enter..."
+             onkeydown="blockedKey(event)" onblur="blockedBlur()">
+    </div>
+  </div>
+
+  <!-- 6. DONE TODAY -->
+  <div class="coll" id="sec-done">
+    <button class="ctrig" onclick="togColl('sec-done')">
+      <span class="carrow">▶</span>
+      <span class="ctitle">Done Today</span>
+      <span class="cbadge" id="badge-done">0</span>
+    </button>
+    <div class="cbody">
+      <div id="done-body"></div>
+      <div class="itfoot">
+        <button class="btn-link" onclick="clearDone()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+
+</main>
+
+<script>
+// ── DATE ──────────────────────────────────────────────────────────────────
+const todayKey  = () => new Date().toISOString().split('T')[0];
+const fmtDate   = () => new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+const fmtTime   = () => new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+const uid       = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+
+document.getElementById('hdate').textContent = fmtDate();
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+const def = () => ({
+  movingNow: null,
+  blockNum:  1,
+  queue:     [],     // [{ id, text, done, updated }]
+  inv:       [],     // [{ id, user, device, serial, action }]
+  waiting:   [],     // [{ id, what, nextPush }]
+  blocked:   [],     // [{ id, text }] max 3
+  tickets:   [],     // [{ id, snow, person, issue, next, status }]
+  doneToday: [],     // [{ id, text, time }]
+  lastSaved: null,
+  opNotes:   []
+});
+
+let S = def();
+
+// ── PERSIST ───────────────────────────────────────────────────────────────
+function save() {
+  S.lastSaved = new Date().toISOString();
+  localStorage.setItem('rct_' + todayKey(), JSON.stringify(S));
+  updSaved();
+}
+function load() {
+  const raw = localStorage.getItem('rct_' + todayKey());
+  if (raw) { try { S = { ...def(), ...JSON.parse(raw) }; } catch(e) { S = def(); } }
+}
+function manualSave() {
+  save();
+  const b = document.querySelector('.btn-ghost');
+  const prev = b.textContent;
+  b.textContent = 'Saved';
+  setTimeout(() => b.textContent = prev, 1200);
+}
+function updSaved() {
+  const el = document.getElementById('hsaved');
+  if (!el || !S.lastSaved) return;
+  el.textContent = 'Saved ' + new Date(S.lastSaved).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(save, 90000);
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+function renderAll() {
+  renderFocus(); renderQueue(); renderInv();
+  renderTkts(); renderWaiting(); renderBlocked(); renderDone();
+  renderNotes();
+  updSaved();
+}
+
+function renderNotes() {
+  const list  = document.getElementById('onote-list');
+  const badge = document.getElementById('badge-opnotes');
+  if (!list) return;
+  const notes = [...(S.opNotes || [])].sort((a,b) => a.done - b.done);
+  const active = notes.filter(n => !n.done).length;
+
+  if (badge) {
+    badge.style.display = active ? '' : 'none';
+    badge.textContent = active;
+    badge.className = 'cbadge hot';
+  }
+
+  if (!notes.length) { list.innerHTML = ''; return; }
+  list.innerHTML = notes.map(n => `
+    <div class="onote-item${n.done?' done':''}" id="on-${n.id}">
+      <input type="checkbox" class="onote-cb" ${n.done?'checked':''} onchange="noteCheck('${n.id}',this.checked)">
+      <span class="onote-text" title="${esc(n.text)}">${esc(n.text)}</span>
+      <button class="onote-del" onclick="noteDel('${n.id}')">×</button>
+    </div>`).join('');
+}
+
+function noteKey(e) {
+  if (e.key !== 'Enter') return;
+  const v = e.target.value.trim();
+  if (!v) return;
+  if (!Array.isArray(S.opNotes)) S.opNotes = [];
+  S.opNotes.push({ id: uid(), text: v, done: false });
+  e.target.value = '';
+  save(); renderNotes();
+  if (!document.getElementById('sec-opnotes').classList.contains('open')) togColl('sec-opnotes');
+}
+
+function noteCheck(id, checked) {
+  const n = (S.opNotes||[]).find(x => x.id === id);
+  if (!n) return;
+  n.done = checked;
+  save(); renderNotes();
+  if (checked) setTimeout(() => {
+    S.opNotes = S.opNotes.filter(x => x.id !== id);
+    save(); renderNotes();
+  }, 1800);
+}
+
+function noteDel(id) {
+  S.opNotes = (S.opNotes||[]).filter(x => x.id !== id);
+  save(); renderNotes();
+}
+
+// ── MOVING NOW ────────────────────────────────────────────────────────────
+function renderFocus() {
+  const slot = document.getElementById('focus-slot');
+  if (!S.movingNow) {
+    stopElapsed();
+    slot.innerHTML = `<div class="focus-empty">
+      <div class="focus-empty-main">Nothing in focus.</div>
+      <div class="focus-empty-hint">Move a queue item here with →</div>
+    </div>`;
+    return;
+  }
+  const { text, startedAt, startedTs, blockNum } = S.movingNow;
+  const bn = blockNum || 1;
+  const elapsedStr = startedTs ? fmtElapsed(startedTs) : '—';
+  const threshold  = bn === 1 ? 90 : 60;
+  const extended   = startedTs && ((Date.now() - startedTs) / 60000) > threshold;
+  slot.innerHTML = `<div class="focus-active">
+    <div class="focus-dot"></div>
+    <div class="focus-content">
+      <div class="focus-block-meta">
+        <span>Block ${bn}</span>
+        <span class="focus-block-sep">·</span>
+        <span>Started ${startedAt || '—'}</span>
+        <span class="focus-block-sep">·</span>
+        <span id="focus-elapsed"${extended?' class="focus-elapsed-ext"':''}>Elapsed ${elapsedStr}${extended?' · Extended':''}</span>
+      </div>
+      <div class="focus-text">${esc(text)}</div>
+      <div class="focus-actions">
+        <button class="btn-done" onclick="focusDone()">Mark done</button>
+        <button class="btn-return" onclick="focusReturn()">Return to queue</button>
+      </div>
+    </div>
+  </div>`;
+  startElapsed();
+}
+
+function focusDone() {
+  if (!S.movingNow) return;
+  S.doneToday.unshift({ id: uid(), text: S.movingNow.text, time: fmtTime() });
+  S.blockNum = (S.blockNum || 1) + 1;
+  S.movingNow = null;
+  save(); renderAll();
+}
+function focusReturn() {
+  if (!S.movingNow) return;
+  S.queue.unshift({ id: S.movingNow.id, text: S.movingNow.text, done: false, updated: fmtTime() });
+  S.movingNow = null;
+  save(); renderAll();
+}
+function moveToFocus(id) {
+  const item = S.queue.find(q => q.id === id);
+  if (!item) return;
+  if (S.movingNow) S.queue.unshift({ id: S.movingNow.id, text: S.movingNow.text, done: false });
+  S.movingNow = { id: item.id, text: item.text, startedAt: fmtTime(), startedTs: Date.now(), blockNum: S.blockNum || 1 };
+  S.queue = S.queue.filter(q => q.id !== id);
+  save(); renderAll();
+}
+
+// ── QUEUE ─────────────────────────────────────────────────────────────────
+function renderQueue() {
+  const list = document.getElementById('qlist');
+  const cnt  = document.getElementById('qcount');
+  const active = (S.queue||[]).filter(q => !q.done).length;
+  cnt.textContent = active + (active === 1 ? ' active' : ' active');
+  cnt.className = 'qcount' + (!active ? ' empty' : '');
+
+  if (!S.queue.length) { list.innerHTML = '<div class="empty">Queue is clear.</div>'; return; }
+
+  list.innerHTML = S.queue.map(q => `
+    <div class="qitem${q.done?' done':''}" id="qi-${q.id}"
+         draggable="true"
+         ondragstart="qDS(event,'${q.id}')"
+         ondragend="qDE(event)"
+         ondragover="qIDO(event,'${q.id}')"
+         ondragleave="qIDL(event,'${q.id}')"
+         ondrop="qIDP(event,'${q.id}')">
+      <span class="dhandle">⠿</span>
+      <input type="checkbox" class="qcb" ${q.done?'checked':''} onchange="qCheck('${q.id}',this.checked)">
+      <span class="qtext" title="${esc(q.text)}">${esc(q.text)}</span>
+      ${q.updated ? `<span class="qtime">${q.updated}</span>` : ''}
+      <span class="qbtns">
+        <button class="qbtn-focus" onclick="moveToFocus('${q.id}')" title="Move to focus">→</button>
+        <button class="qbtn-del"   onclick="qDel('${q.id}')" title="Remove">×</button>
+      </span>
+    </div>`).join('');
+}
+
+function qCheck(id, checked) {
+  const item = S.queue.find(q => q.id === id);
+  if (!item) return;
+  item.done = checked;
+  if (checked) {
+    setTimeout(() => {
+      S.queue = S.queue.filter(q => q.id !== id);
+      S.doneToday.unshift({ id: uid(), text: item.text, time: fmtTime() });
+      save(); renderAll();
+    }, 360);
+  } else { save(); renderQueue(); }
+}
+function qDel(id) { S.queue = S.queue.filter(q => q.id !== id); save(); renderQueue(); }
+function qAddKey(e) {
+  if (e.key !== 'Enter') return;
+  const v = e.target.value.trim();
+  if (!v) return;
+  S.queue.push({ id: uid(), text: v, done: false, updated: fmtTime() });
+  e.target.value = ''; save(); renderQueue();
+}
+
+// ── QUEUE DRAG ────────────────────────────────────────────────────────────
+let _did = null;
+function qDS(e, id) {
+  _did = id; e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => { const el=document.getElementById('qi-'+id); if(el) el.classList.add('dragging'); }, 0);
+}
+function qDE(e) {
+  if (_did) { const el=document.getElementById('qi-'+_did); if(el) el.classList.remove('dragging'); }
+  document.querySelectorAll('.qitem').forEach(el => el.classList.remove('droptarget'));
+}
+function qDragOver(e) { e.preventDefault(); }
+function qDrop(e) { e.preventDefault(); }
+function qIDO(e, tid) {
+  e.preventDefault();
+  if (!_did || _did === tid) return;
+  document.querySelectorAll('.qitem').forEach(el => el.classList.remove('droptarget'));
+  const el = document.getElementById('qi-'+tid); if(el) el.classList.add('droptarget');
+}
+function qIDL(e, tid) { const el=document.getElementById('qi-'+tid); if(el) el.classList.remove('droptarget'); }
+function qIDP(e, tid) {
+  e.preventDefault();
+  document.querySelectorAll('.qitem').forEach(el => el.classList.remove('droptarget'));
+  if (!_did || _did === tid) { _did=null; return; }
+  const fi = S.queue.findIndex(q=>q.id===_did);
+  const ti = S.queue.findIndex(q=>q.id===tid);
+  if (fi===-1||ti===-1) { _did=null; return; }
+  const [item] = S.queue.splice(fi,1); S.queue.splice(ti,0,item);
+  _did=null; save(); renderQueue();
+}
+
+// ── INVENTORY MOVEMENT ────────────────────────────────────────────────────
+function renderInv() {
+  const body  = document.getElementById('inv-body');
+  const badge = document.getElementById('badge-inv');
+  badge.textContent = S.inv.length;
+  badge.className   = 'cbadge' + (S.inv.length ? ' hot' : '');
+
+  if (!S.inv.length) {
+    body.innerHTML = '<tr><td colspan="6"><div class="empty">No inventory in motion.</div></td></tr>'; return;
+  }
+  body.innerHTML = S.inv.map(r => `
+    <tr class="${r.done?'row-done':''}">
+      <td class="cb-cell"><input type="checkbox" class="qcb" ${r.done?'checked':''} onchange="invCheck('${r.id}',this.checked)"></td>
+      <td><input class="itd-inp" value="${esc(r.user)}"   placeholder="User…"            oninput="updInv('${r.id}','user',this.value)"></td>
+      <td><input class="itd-inp" value="${esc(r.device)}" placeholder="Device…"          oninput="updInv('${r.id}','device',this.value)"></td>
+      <td><input class="itd-inp" value="${esc(r.serial||'')}" placeholder="S/N or IMEI…" oninput="updInv('${r.id}','serial',this.value)" style="font-family:var(--mono);font-size:12px;"></td>
+      <td><input class="itd-inp" value="${esc(r.action||r.move||'')}" placeholder="Ready for pickup, return pending…" oninput="updInv('${r.id}','action',this.value)"></td>
+      <td style="text-align:center;"><button class="btn-icon" onclick="delInv('${r.id}')">×</button></td>
+    </tr>`).join('');
+}
+function invCheck(id, checked) {
+  const r = S.inv.find(x => x.id === id);
+  if (!r) return;
+  r.done = checked;
+  save(); renderInv();
+  if (checked) setTimeout(() => {
+    const label = [r.device, r.action].filter(Boolean).join(' — ') || 'Inventory item';
+    S.doneToday.unshift({ id: uid(), text: label, time: fmtTime() });
+    S.inv = S.inv.filter(x => x.id !== id);
+    save(); renderAll();
+  }, 600);
+}
+function addInv() {
+  S.inv.push({ id: uid(), user: '', device: '', serial: '', action: '' });
+  save(); renderInv();
+  if (!document.getElementById('sec-inv').classList.contains('open')) togColl('sec-inv');
+}
+function updInv(id, f, v) { const r=S.inv.find(x=>x.id===id); if(r){r[f]=v;save();} }
+function delInv(id) { S.inv=S.inv.filter(x=>x.id!==id); save(); renderInv(); }
+
+// ── TICKETS ────────────────────────────────────────────────────────────────
+function renderTkts() {
+  const body  = document.getElementById('tkt-body');
+  const badge = document.getElementById('badge-tkt');
+  if (!body) return;
+  const open = (S.tickets||[]).filter(t => !t.done).length;
+  badge.textContent = S.tickets.length;
+  badge.className   = 'cbadge' + (open ? ' hot' : '');
+
+  if (!S.tickets.length) {
+    body.innerHTML = '<tr><td colspan="6"><div class="empty">No active tickets.</div></td></tr>'; return;
+  }
+  body.innerHTML = S.tickets.map(t => `
+    <tr class="${t.done?'row-done':''}">
+      <td class="cb-cell"><input type="checkbox" class="qcb" ${t.done?'checked':''} onchange="tktCheck('${t.id}',this.checked)"></td>
+      <td><input class="itd-inp" value="${esc(t.snow||t.ticket||'')}"  placeholder="INC / RITM…" oninput="updTkt('${t.id}','snow',this.value)" style="font-family:var(--mono);font-size:12px;font-weight:500;"></td>
+      <td><input class="itd-inp" value="${esc(t.person||t.user||'')}"  placeholder="User…"        oninput="updTkt('${t.id}','person',this.value)"></td>
+      <td><input class="itd-inp" value="${esc(t.issue||t.focus||'')}"  placeholder="Focus…"       oninput="updTkt('${t.id}','issue',this.value)"></td>
+      <td><input class="itd-inp" value="${esc(t.next||'')}"            placeholder="Next…"         oninput="updTkt('${t.id}','next',this.value)"></td>
+      <td style="text-align:center;"><button class="btn-icon" onclick="delTkt('${t.id}')">×</button></td>
+    </tr>`).join('');
+}
+function tktCheck(id, checked) {
+  const t = S.tickets.find(x => x.id === id);
+  if (!t) return;
+  t.done = checked;
+  save(); renderTkts();
+  if (checked) setTimeout(() => {
+    const label = [t.snow||t.ticket, t.issue||t.focus].filter(Boolean).join(' — ') || 'Ticket closed';
+    S.doneToday.unshift({ id: uid(), text: label, time: fmtTime() });
+    S.tickets = S.tickets.filter(x => x.id !== id);
+    save(); renderAll();
+  }, 600);
+}
+function addTkt() {
+  S.tickets.push({ id:uid(), snow:'', person:'', issue:'', next:'' });
+  save(); renderTkts();
+  if (!document.getElementById('sec-tkt').classList.contains('open')) togColl('sec-tkt');
+}
+function updTkt(id,f,v) { const t=(S.tickets||[]).find(x=>x.id===id); if(t){t[f]=v;save();} }
+function delTkt(id) { S.tickets=S.tickets.filter(x=>x.id!==id); save(); renderTkts(); }
+
+// ── WAITING ────────────────────────────────────────────────────────────────
+function renderWaiting() {
+  const body  = document.getElementById('wait-body');
+  const tbl   = document.getElementById('wait-tbl');
+  const empty = document.getElementById('wait-empty');
+  const badge = document.getElementById('badge-wait');
+  badge.textContent = S.waiting.length;
+  badge.className   = 'cbadge' + (S.waiting.length ? ' hot' : '');
+
+  if (!S.waiting.length) {
+    tbl.style.display='none'; empty.style.display='block'; return;
+  }
+  tbl.style.display='table'; empty.style.display='none';
+  body.innerHTML = S.waiting.map(w => `
+    <tr>
+      <td><input class="itd-inp" value="${esc(w.what)}"     placeholder="Who or what…"  oninput="updW('${w.id}','what',this.value)"></td>
+      <td><input class="itd-inp" value="${esc(w.nextPush)}" placeholder="Mon AM…"        oninput="updW('${w.id}','nextPush',this.value)"></td>
+      <td style="text-align:center;"><button class="btn-icon" onclick="delW('${w.id}')">×</button></td>
+    </tr>`).join('');
+}
+function addWait() {
+  S.waiting.push({ id: uid(), what: '', nextPush: '' });
+  save(); renderWaiting();
+  if (!document.getElementById('sec-wait').classList.contains('open')) togColl('sec-wait');
+  setTimeout(() => { const rows=document.querySelectorAll('#wait-body .itd-inp'); if(rows.length) rows[rows.length-2].focus(); }, 30);
+}
+function updW(id, f, v) { const w=S.waiting.find(x=>x.id===id); if(w){w[f]=v;save();} }
+function delW(id) { S.waiting=S.waiting.filter(x=>x.id!==id); save(); renderWaiting(); }
+
+// ── BLOCKED ────────────────────────────────────────────────────────────────
+function renderBlocked() {
+  const card = document.getElementById('bcard');
+  const items= document.getElementById('bitems');
+  const abtn = document.getElementById('badd-btn');
+
+  card.style.display = S.blocked.length ? 'block' : 'none';
+  if (!S.blocked.length) return;
+
+  items.innerHTML = S.blocked.map(b => `
+    <div class="bitem">
+      <span class="bdot"></span>
+      <span class="btext">${esc(b.text)}</span>
+      <button class="btn-icon" onclick="delBlocked('${b.id}')" style="color:#CC3A2A;opacity:.7;">×</button>
+    </div>`).join('');
+  if (abtn) abtn.style.display = S.blocked.length >= 3 ? 'none' : '';
+}
+function showBlockedInput() {
+  if (S.blocked.length >= 3) return;
+  document.getElementById('bcard').style.display = 'block';
+  document.getElementById('badd-zone').style.display = 'block';
+  document.getElementById('badd-inp').focus();
+}
+function blockedKey(e) {
+  if (e.key === 'Enter') {
+    const v = e.target.value.trim();
+    if (v && S.blocked.length < 3) S.blocked.push({ id: uid(), text: v });
+    e.target.value = '';
+    document.getElementById('badd-zone').style.display = 'none';
+    save(); renderBlocked();
+  }
+  if (e.key === 'Escape') {
+    e.target.value = '';
+    document.getElementById('badd-zone').style.display = 'none';
+    renderBlocked();
+  }
+}
+function blockedBlur() {
+  const v = document.getElementById('badd-inp').value.trim();
+  if (v && S.blocked.length < 3) { S.blocked.push({ id: uid(), text: v }); save(); }
+  document.getElementById('badd-inp').value = '';
+  document.getElementById('badd-zone').style.display = 'none';
+  renderBlocked();
+}
+function delBlocked(id) { S.blocked=S.blocked.filter(b=>b.id!==id); save(); renderBlocked(); }
+
+// ── DONE TODAY ────────────────────────────────────────────────────────────
+function renderDone() {
+  const body  = document.getElementById('done-body');
+  const badge = document.getElementById('badge-done');
+  badge.textContent = S.doneToday.length;
+  badge.className   = 'cbadge' + (S.doneToday.length ? ' hot' : '');
+
+  if (!S.doneToday.length) { body.innerHTML = '<div class="empty">No movement yet.</div>'; return; }
+  body.innerHTML = S.doneToday.map(d => `
+    <div class="ditem">
+      <span class="dcheck">✓</span>
+      <span class="dtext">${esc(d.text)}</span>
+      <span class="dtime">${d.time||''}</span>
+    </div>`).join('');
+}
+function clearDone() { S.doneToday=[]; save(); renderDone(); }
+
+// ── COLLAPSIBLES ───────────────────────────────────────────────────────────
+function togColl(id) { document.getElementById(id).classList.toggle('open'); }
+
+// ── NEW DAY ────────────────────────────────────────────────────────────────
+let _nd = 'carry';
+function openNewDay()  { _nd='carry'; selNd('carry'); document.getElementById('ndModal').classList.add('open'); }
+function closeNewDay() { document.getElementById('ndModal').classList.remove('open'); }
+function selNd(v) {
+  _nd=v;
+  document.getElementById('nd-carry').classList.toggle('sel', v==='carry');
+  document.getElementById('nd-fresh').classList.toggle('sel', v==='fresh');
+}
+function confirmNewDay() {
+  const today = todayKey();
+  const hist  = JSON.parse(localStorage.getItem('rct_hist')||'[]');
+  if (!hist.find(h=>h.date===today)) {
+    hist.unshift({ date:today, data:JSON.parse(JSON.stringify(S)) });
+    localStorage.setItem('rct_hist', JSON.stringify(hist.slice(0,60)));
+  }
+  if (_nd === 'carry') {
+    const q = S.queue.filter(q=>!q.done);
+    const w = S.waiting;
+    const b = S.blocked;
+    const i = S.inv;
+    const t = (S.tickets||[]).filter(t=>t.status!=='Closed');
+    S = def(); S.queue=q; S.waiting=w; S.blocked=b; S.inv=i; S.tickets=t;
+  } else { S = def(); }
+  save(); renderAll(); closeNewDay();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape' && document.getElementById('ndModal').classList.contains('open')) { closeNewDay(); return; }
+  if ((e.metaKey||e.ctrlKey) && e.key==='s') { e.preventDefault(); manualSave(); }
+  if (e.key==='/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+    e.preventDefault(); document.getElementById('qcap-inp').focus();
+  }
+});
+
+// ── ELAPSED TIMER ─────────────────────────────────────────────────────────
+function fmtElapsed(startedTs) {
+  const mins = Math.floor((Date.now() - startedTs) / 60000);
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+let _elTimer = null;
+function startElapsed() {
+  if (_elTimer) return; // already running
+  _elTimer = setInterval(updateElapsed, 30000);
+}
+function stopElapsed() {
+  if (_elTimer) { clearInterval(_elTimer); _elTimer = null; }
+}
+function updateElapsed() {
+  const el = document.getElementById('focus-elapsed');
+  if (!el || !S.movingNow?.startedTs) { stopElapsed(); return; }
+  const mins     = Math.floor((Date.now() - S.movingNow.startedTs) / 60000);
+  const h        = Math.floor(mins / 60), m = mins % 60;
+  const elapsed  = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  const bn       = S.movingNow.blockNum || 1;
+  const extended = mins > (bn === 1 ? 90 : 60);
+  el.textContent = 'Elapsed ' + elapsed + (extended ? ' · Extended' : '');
+  el.className   = extended ? 'focus-elapsed-ext' : '';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+load();
+renderAll();
+</script>
+</body>
+</html>
